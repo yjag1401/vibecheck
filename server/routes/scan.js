@@ -114,7 +114,8 @@ module.exports = function (db) {
       const verdict = getVerdict(score);
       const scanId = saveScan(db, url, score, verdict, issues);
 
-      cleanup(cloneDir);
+      // Delay cleanup so heatmap can read files (clean after 5 min)
+      setTimeout(() => cleanup(cloneDir), 5 * 60 * 1000);
 
       res.json({
         scanId,
