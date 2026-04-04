@@ -110,21 +110,24 @@ function ScanResults({ data, onReset }) {
       <CodeHeatmap scanId={data.scanId} />
 
       {/* Static Analysis */}
-      <div className="space-y-3">
-        <h3 className="text-[10px] font-semibold text-dim uppercase tracking-widest">Static Analysis</h3>
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-xl font-semibold text-white">Issues Found</h2>
+          <span className="text-sm font-mono text-dim">{filteredIssues.length} of {staticIssues.length}</span>
+        </div>
         <div className="flex gap-2">
           {['all', 'CRITICAL', 'HIGH', 'MEDIUM', 'LOW'].map(f => (
             <button key={f} onClick={() => setFilter(f)}
-              className={`px-3 py-1.5 rounded text-[10px] font-semibold uppercase tracking-wider transition-all ${
-                filter === f ? 'bg-cyan text-bg' : 'bg-surface border border-border text-dim hover:text-white hover:border-cyan'
+              className={`px-4 py-2 rounded-full text-xs font-medium transition-all ${
+                filter === f ? 'bg-cyan/20 text-cyan border border-cyan/40' : 'text-dim hover:text-white hover:bg-white/5 border border-transparent'
               }`}>
               {f === 'all' ? `All (${staticIssues.length})` : `${f} (${sc[f]})`}
             </button>
           ))}
         </div>
-        <div className="space-y-1.5">
+        <div className="space-y-3">
           {filteredIssues.length === 0 ? (
-            <div className="text-center py-10 text-[#555] text-sm">No issues found{filter !== 'all' ? ` with ${filter} severity` : ''}.</div>
+            <div className="glass p-12 text-center rounded-2xl"><p className="text-dim">No issues match this filter.</p></div>
           ) : filteredIssues.map((issue, i) => <IssueCard key={i} issue={issue} />)}
         </div>
       </div>
