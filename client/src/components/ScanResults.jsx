@@ -1,7 +1,5 @@
 import { useState } from 'react';
 import { Bot } from 'lucide-react';
-import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement } from 'chart.js';
-import { Pie, Bar } from 'react-chartjs-2';
 import ScoreCircle from './ScoreCircle';
 import IssueCard from './IssueCard';
 import AgentResults from './AgentResults';
@@ -10,7 +8,80 @@ import CodeHeatmap from './CodeHeatmap';
 import SimulationResults from './SimulationResults';
 import ProtectRepo from './ProtectRepo';
 
-ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement);
+function SeverityDonut({ counts }) {
+  const items = [
+    { label: 'Critical', count: counts.CRITICAL, color: '#FF4ECD' },
+    { label: 'High', count: counts.HIGH, color: '#FFB84D' },
+    { label: 'Medium', count: counts.MEDIUM, color: '#2BB6FF' },
+    { label: 'Low', count: counts.LOW, color: '#555' },
+  ];
+  const total = items.reduce((s, i) => s + i.count, 0) || 1;
+  const r = 60, sw = 14, c = 2 * Math.PI * r;
+  let offset = 0;
+
+  return (
+    <div className="flex flex-col items-center">
+      <svg width="160" height="160" viewBox="0 0 160 160">
+        <circle cx="80" cy="80" r={r} fill="none" stroke="#1a1a24" strokeWidth={sw} />
+        {items.map((item, i) => {
+          const dash = (item.count / total) * c;
+          const gap = c - dash;
+          const o = offset;
+          offset += dash;
+          if (item.count === 0) return null;
+          return (
+            <circle key={i} cx="80" cy="80" r={r} fill="none"
+              stroke={item.color} strokeWidth={sw} strokeLinecap="round"
+              strokeDasharray={`${dash - 2} ${gap + 2}`} strokeDashoffset={-o}
+              className="-rotate-90 origin-center"
+              style={{ filter: `drop-shadow(0 0 6px ${item.color}40)`, transition: 'stroke-dasharray 0.8s ease' }} />
+          );
+        })}
+        <text x="80" y="75" textAnchor="middle" className="fill-white text-2xl font-black font-mono">{total}</text>
+        <text x="80" y="95" textAnchor="middle" className="fill-[#888] text-[10px] uppercase tracking-widest">Issues</text>
+      </svg>
+      <div className="flex gap-4 mt-3">
+        {items.map(item => (
+          <div key={item.label} className="flex items-center gap-1.5">
+            <div className="w-2 h-2 rounded-full" style={{ backgroundColor: item.color, boxShadow: `0 0 6px ${item.color}60` }} />
+            <span className="text-[9px] text-dim font-mono">{item.count}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function ScannerBars({ counts }) {
+  const items = [
+    { label: 'Secrets', count: counts.secrets, color: '#FF4ECD' },
+    { label: 'Deps', count: counts.dependencies, color: '#7B61FF' },
+    { label: 'PII', count: counts.pii, color: '#FFB84D' },
+    { label: 'Code Smells', count: counts.codeSmells, color: '#00F0FF' },
+  ];
+  const max = Math.max(...items.map(i => i.count), 1);
+
+  return (
+    <div className="space-y-3">
+      {items.map(item => (
+        <div key={item.label} className="group">
+          <div className="flex items-center justify-between mb-1">
+            <span className="text-[10px] text-dim font-mono uppercase tracking-wider">{item.label}</span>
+            <span className="text-xs font-bold font-mono" style={{ color: item.color }}>{item.count}</span>
+          </div>
+          <div className="h-2 bg-[#1a1a24] rounded-full overflow-hidden">
+            <div className="h-full rounded-full transition-all duration-700"
+              style={{
+                width: `${Math.max((item.count / max) * 100, item.count > 0 ? 8 : 0)}%`,
+                background: `linear-gradient(90deg, ${item.color}, ${item.color}88)`,
+                boxShadow: `0 0 10px ${item.color}40`,
+              }} />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
 
 function ScanResults({ data, onReset }) {
   const [filter, setFilter] = useState('all');
@@ -27,44 +98,21 @@ function ScanResults({ data, onReset }) {
   const filteredIssues = filter === 'all' ? staticIssues : staticIssues.filter(i => i.severity === filter);
   const sc = { CRITICAL: staticIssues.filter(i => i.severity === 'CRITICAL').length, HIGH: staticIssues.filter(i => i.severity === 'HIGH').length, MEDIUM: staticIssues.filter(i => i.severity === 'MEDIUM').length, LOW: staticIssues.filter(i => i.severity === 'LOW').length };
 
-  const severityChartData = {
-    labels: ['Critical', 'High', 'Medium', 'Low'],
-    datasets: [{ data: [data.severityCounts.CRITICAL, data.severityCounts.HIGH, data.severityCounts.MEDIUM, data.severityCounts.LOW],
-      backgroundColor: ['#FF3B30', '#FF9500', '#FFD60A', '#555'], borderWidth: 0 }],
-  };
-  const scannerChartData = {
-    labels: ['Secrets', 'Deps', 'PII', 'Smells'],
-    datasets: [{ label: 'Issues', data: [data.scannerCounts.secrets, data.scannerCounts.dependencies, data.scannerCounts.pii, data.scannerCounts.codeSmells],
-      backgroundColor: '#00F0FF', borderWidth: 0, borderRadius: 3 }],
-  };
-  const chartOpts = { responsive: true, plugins: { legend: { labels: { color: '#888', font: { size: 10 } } } } };
-  const barOpts = { ...chartOpts, scales: { x: { ticks: { color: '#888', font: { size: 9 } }, grid: { display: false } }, y: { ticks: { color: '#888', stepSize: 1 }, grid: { color: '#333' } } } };
-
   return (
     <div className="fade-in space-y-5">
       {/* Score + Charts */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-surface border border-border rounded-xl p-6 flex flex-col items-center justify-center card-hover">
+        <div className="glass rounded-2xl p-6 flex flex-col items-center justify-center card-hover">
           <ScoreCircle score={data.score} verdict={data.verdict} verdictColor={data.verdictColor} />
         </div>
-        <div className="bg-surface border border-border rounded-xl p-5 card-hover">
-          <h3 className="text-[10px] font-semibold text-dim uppercase tracking-widest mb-3">Severity</h3>
-          <div className="w-40 mx-auto"><Pie data={severityChartData} options={chartOpts} /></div>
+        <div className="glass rounded-2xl p-6 card-hover">
+          <h3 className="text-[10px] font-mono font-semibold text-dim uppercase tracking-widest mb-4">Severity Breakdown</h3>
+          <SeverityDonut counts={data.severityCounts} />
         </div>
-        <div className="bg-surface border border-border rounded-xl p-5 card-hover">
-          <h3 className="text-[10px] font-semibold text-dim uppercase tracking-widest mb-3">Scanners</h3>
-          <Bar data={scannerChartData} options={barOpts} />
+        <div className="glass rounded-2xl p-6 card-hover">
+          <h3 className="text-[10px] font-mono font-semibold text-dim uppercase tracking-widest mb-4">Scanner Results</h3>
+          <ScannerBars counts={data.scannerCounts} />
         </div>
-      </div>
-
-      {/* Severity counts row — Figma style */}
-      <div className="grid grid-cols-4 gap-2">
-        {[['CRITICAL', sc.CRITICAL, 'border-critical/40 text-critical'], ['HIGH', sc.HIGH, 'border-high/40 text-high'], ['MEDIUM', sc.MEDIUM, 'border-medium/40 text-medium'], ['LOW', sc.LOW, 'border-dim/40 text-dim']].map(([label, count, cls]) => (
-          <div key={label} className={`bg-surface border ${cls} rounded-lg p-3 text-center`}>
-            <div className="text-2xl font-black font-mono">{count}</div>
-            <div className="text-[9px] uppercase tracking-widest mt-1 opacity-60">{label}</div>
-          </div>
-        ))}
       </div>
 
       <Badges data={data} />
