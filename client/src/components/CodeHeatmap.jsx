@@ -55,6 +55,21 @@ function FileHeatmap({ file }) {
       {/* Code view */}
       {expanded && (
         <div className="border-t border-slate-700/50 overflow-x-auto">
+          {/* Issues without line numbers (e.g. dependency CVEs) */}
+          {file.issues.filter(i => !i.lineNumber).length > 0 && (
+            <div className="px-4 py-2 space-y-1 border-b border-slate-700/30 bg-slate-800/50">
+              {file.issues.filter(i => !i.lineNumber).map((iss, j) => {
+                const col = SEVERITY_COLORS[iss.severity] || SEVERITY_COLORS.MEDIUM;
+                return (
+                  <div key={j} className="flex items-center gap-2 text-xs" style={{ color: col.border }}>
+                    <span className="font-bold">{iss.severity}</span>
+                    <span className="text-slate-300">{iss.title}</span>
+                    <span className="text-slate-500">— {iss.description}</span>
+                  </div>
+                );
+              })}
+            </div>
+          )}
           <pre className="text-xs leading-relaxed">
             {lines.map((line, i) => {
               const lineNum = i + 1;
