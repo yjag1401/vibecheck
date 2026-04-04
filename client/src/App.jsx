@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import ScanInput from './components/ScanInput';
 import ScanProgress from './components/ScanProgress';
 import ScanResults from './components/ScanResults';
+import KnowledgeBase from './components/KnowledgeBase';
 
 function App() {
   const [state, setState] = useState('input'); // input | scanning | results | error | loading
@@ -80,20 +81,37 @@ function App() {
               <p className="text-xs text-slate-400">AI Code Auditor</p>
             </div>
           </div>
-          {state !== 'input' && (
+          <div className="flex items-center gap-4">
             <button
-              onClick={handleReset}
-              className="text-sm text-slate-400 hover:text-white transition-colors"
+              onClick={() => setState('kb')}
+              className={`text-sm transition-colors ${state === 'kb' ? 'text-teal' : 'text-slate-400 hover:text-white'}`}
             >
-              New Scan
+              Knowledge Base
             </button>
-          )}
+            {state !== 'input' && state !== 'kb' && (
+              <button
+                onClick={handleReset}
+                className="text-sm text-slate-400 hover:text-white transition-colors"
+              >
+                New Scan
+              </button>
+            )}
+            {state === 'kb' && (
+              <button
+                onClick={handleReset}
+                className="text-sm text-slate-400 hover:text-white transition-colors"
+              >
+                New Scan
+              </button>
+            )}
+          </div>
         </div>
       </header>
 
       {/* Main */}
       <main className="max-w-6xl mx-auto px-6 py-8">
         {state === 'input' && <ScanInput onScan={handleScan} />}
+        {state === 'kb' && <KnowledgeBase onBack={handleReset} />}
         {state === 'loading' && (
           <div className="text-center py-20 fade-in">
             <div className="inline-block animate-spin text-4xl mb-4">&#9881;</div>
