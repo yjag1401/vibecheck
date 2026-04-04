@@ -1,0 +1,3 @@
+[      38ms] ReferenceError: undefinedVar is not defined
+    at http://localhost:4074/:56:17
+[      49ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:4074/favicon.ico:0

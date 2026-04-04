@@ -10,7 +10,7 @@ function SimulationResults({ simulation }) {
   const { log, mode, issueCount } = simulation;
   if (!log || log.length === 0) return null;
 
-  const modeLabel = mode === 'ai-guided' ? 'AI-Guided (Claude Sonnet 4.6)' : mode === 'scripted' ? 'Scripted Tests' : 'Failed';
+  const modeLabel = mode === 'mcp' ? 'MCP (Playwright + Claude Sonnet 4.6)' : mode === 'ai-guided' ? 'AI-Guided (Claude Sonnet 4.6)' : mode === 'scripted' ? 'Scripted Tests' : 'Failed';
 
   return (
     <div className="glass rounded-2xl p-6 space-y-4">
