@@ -22,9 +22,18 @@ function ScanResults({ data, onReset }) {
   const badgeUrl = `${window.location.origin}/api/badge/${data.scanId}`;
   const badgeMarkdown = `[![VibeCheck](${badgeUrl})](${reportUrl})`;
 
+  // Separate static scanner issues from simulation issues
+  const staticIssues = data.issues.filter(i => i.scanner !== 'simulation');
   const filteredIssues = filter === 'all'
-    ? data.issues
-    : data.issues.filter((i) => i.severity === filter);
+    ? staticIssues
+    : staticIssues.filter((i) => i.severity === filter);
+
+  const staticCounts = {
+    CRITICAL: staticIssues.filter(i => i.severity === 'CRITICAL').length,
+    HIGH: staticIssues.filter(i => i.severity === 'HIGH').length,
+    MEDIUM: staticIssues.filter(i => i.severity === 'MEDIUM').length,
+    LOW: staticIssues.filter(i => i.severity === 'LOW').length,
+  };
 
   const severityChartData = {
     labels: ['Critical', 'High', 'Medium', 'Low'],
@@ -106,27 +115,31 @@ function ScanResults({ data, onReset }) {
 
       <CodeHeatmap scanId={data.scanId} />
 
-      {/* Filters */}
-      <div className="flex gap-2">
-        {['all', 'CRITICAL', 'HIGH', 'MEDIUM', 'LOW'].map((f) => (
-          <button
-            key={f}
-            onClick={() => setFilter(f)}
-            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-              filter === f ? 'bg-white text-black' : 'glass text-white/40 hover:text-white'
-            }`}
-          >
-            {f === 'all' ? `All (${data.totalIssues})` : `${f} (${data.severityCounts[f]})`}
-          </button>
-        ))}
-      </div>
+      {/* Static Analysis Section */}
+      <div className="space-y-3">
+        <h3 className="text-xs font-semibold text-white/30 uppercase tracking-widest px-1">Static Analysis</h3>
 
-      <div className="space-y-2">
-        {filteredIssues.length === 0 ? (
-          <div className="text-center py-12 text-white/20">No issues found{filter !== 'all' ? ` with ${filter} severity` : ''}.</div>
-        ) : (
-          filteredIssues.map((issue, i) => <IssueCard key={i} issue={issue} />)
-        )}
+        <div className="flex gap-2">
+          {['all', 'CRITICAL', 'HIGH', 'MEDIUM', 'LOW'].map((f) => (
+            <button
+              key={f}
+              onClick={() => setFilter(f)}
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                filter === f ? 'bg-white text-black' : 'glass text-white/40 hover:text-white'
+              }`}
+            >
+              {f === 'all' ? `All (${staticIssues.length})` : `${f} (${staticCounts[f]})`}
+            </button>
+          ))}
+        </div>
+
+        <div className="space-y-2">
+          {filteredIssues.length === 0 ? (
+            <div className="text-center py-12 text-white/20">No issues found{filter !== 'all' ? ` with ${filter} severity` : ''}.</div>
+          ) : (
+            filteredIssues.map((issue, i) => <IssueCard key={i} issue={issue} />)
+          )}
+        </div>
       </div>
 
       <AgentResults
