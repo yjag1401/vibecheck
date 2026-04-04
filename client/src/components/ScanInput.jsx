@@ -1,5 +1,54 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ScanSearch } from 'lucide-react';
+
+function WinkingBuddy() {
+  const [winking, setWinking] = useState(false);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setWinking(true);
+      setTimeout(() => setWinking(false), 300);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <svg width="80" height="80" viewBox="0 0 80 80" className="mx-auto mb-5">
+      {/* Head */}
+      <rect x="15" y="10" width="50" height="45" rx="12" fill="#0E0E14" stroke="#00F0FF" strokeWidth="1.5" />
+      {/* Antenna */}
+      <line x1="40" y1="10" x2="40" y2="2" stroke="#00F0FF" strokeWidth="1.5" />
+      <circle cx="40" cy="2" r="2.5" fill="#00F0FF" className="animate-pulse" />
+      {/* Left eye */}
+      <circle cx="30" cy="30" r="5" fill="#00F0FF" opacity="0.9">
+        <animate attributeName="opacity" values="0.9;1;0.9" dur="2s" repeatCount="indefinite" />
+      </circle>
+      {/* Right eye — winks */}
+      {winking ? (
+        <line x1="45" y1="30" x2="55" y2="30" stroke="#00F0FF" strokeWidth="2" strokeLinecap="round" />
+      ) : (
+        <circle cx="50" cy="30" r="5" fill="#00F0FF" opacity="0.9">
+          <animate attributeName="opacity" values="0.9;1;0.9" dur="2s" repeatCount="indefinite" />
+        </circle>
+      )}
+      {/* Mouth — small smile */}
+      <path d="M 32 42 Q 40 48 48 42" fill="none" stroke="#00F0FF" strokeWidth="1.5" strokeLinecap="round" />
+      {/* Body */}
+      <rect x="25" y="57" width="30" height="15" rx="5" fill="#0E0E14" stroke="#00F0FF" strokeWidth="1" />
+      {/* Arms */}
+      <line x1="25" y1="62" x2="15" y2="68" stroke="#00F0FF" strokeWidth="1.5" strokeLinecap="round">
+        <animate attributeName="y2" values="68;65;68" dur="2s" repeatCount="indefinite" />
+      </line>
+      <line x1="55" y1="62" x2="65" y2="68" stroke="#00F0FF" strokeWidth="1.5" strokeLinecap="round">
+        <animate attributeName="y2" values="68;65;68" dur="2s" repeatCount="indefinite" begin="0.5s" />
+      </line>
+      {/* Screen lines on body */}
+      <line x1="30" y1="62" x2="42" y2="62" stroke="#00F0FF" strokeWidth="1" opacity="0.4" />
+      <line x1="30" y1="65" x2="38" y2="65" stroke="#00F0FF" strokeWidth="1" opacity="0.3" />
+      <line x1="30" y1="68" x2="45" y2="68" stroke="#00F0FF" strokeWidth="1" opacity="0.2" />
+    </svg>
+  );
+}
 
 function ScanInput({ onScan }) {
   const [mode, setMode] = useState('url');
@@ -17,7 +66,7 @@ function ScanInput({ onScan }) {
   return (
     <div className="max-w-2xl mx-auto py-16 fade-in">
       <div className="text-center mb-10">
-        <ScanSearch className="w-10 h-10 text-cyan mx-auto mb-4" strokeWidth={1} />
+        <WinkingBuddy />
         <h2 className="text-4xl font-black text-white mb-3 tracking-tight">
           Audit Your<br />
           <span className="text-cyan">Vibe-Coded App</span>
