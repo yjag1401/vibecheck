@@ -1,8 +1,20 @@
-import { Compass, Search, Keyboard, MousePointer, AlertTriangle, SkipForward, CheckCircle2, XCircle, Bot } from 'lucide-react';
+import { Compass, Search, Keyboard, MousePointer, AlertTriangle, CheckCircle2, XCircle, Bot, Eye, Terminal, Globe, FileCode, MessageSquare, Layers, X } from 'lucide-react';
 
-const ACTION_ICONS = {
-  navigate: Compass, inspect: Search, type: Keyboard, click: MousePointer,
-  finding: AlertTriangle, skip: SkipForward, done: CheckCircle2, error: XCircle,
+const ACTION_MAP = {
+  navigate:          { Icon: Globe,          label: 'Navigate' },
+  snapshot:          { Icon: Eye,            label: 'Snapshot' },
+  click:             { Icon: MousePointer,   label: 'Click' },
+  type:              { Icon: Keyboard,       label: 'Type' },
+  fill:              { Icon: Keyboard,       label: 'Fill' },
+  evaluate:          { Icon: Terminal,        label: 'Evaluate' },
+  console_messages:  { Icon: MessageSquare,  label: 'Console' },
+  handle_dialog:     { Icon: AlertTriangle,  label: 'Dialog' },
+  tabs:              { Icon: Layers,         label: 'Tabs' },
+  close:             { Icon: X,              label: 'Close' },
+  inspect:           { Icon: Search,         label: 'Inspect' },
+  finding:           { Icon: AlertTriangle,  label: 'Finding' },
+  done:              { Icon: CheckCircle2,   label: 'Done' },
+  error:             { Icon: XCircle,        label: 'Error' },
 };
 
 function SimulationResults({ simulation }) {
@@ -14,6 +26,7 @@ function SimulationResults({ simulation }) {
 
   return (
     <div className="glass rounded-2xl p-6 space-y-4">
+      {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Bot className="w-5 h-5 text-white/40" strokeWidth={1.5} />
@@ -30,25 +43,70 @@ function SimulationResults({ simulation }) {
         </div>
       </div>
 
-      <div className="relative pl-8 space-y-0">
-        <div className="absolute left-[15px] top-2 bottom-2 w-px bg-white/[0.06]" />
+      {/* Timeline */}
+      <div className="relative pl-10 space-y-0">
+        {/* Vertical line */}
+        <div className="absolute left-[18px] top-2 bottom-2 w-px bg-white/[0.06]" />
+
         {log.map((entry, i) => {
-          const IconComponent = ACTION_ICONS[entry.action] || Search;
+          const actionKey = entry.action || 'inspect';
+          const mapped = ACTION_MAP[actionKey] || { Icon: Search, label: actionKey };
+          const IconComponent = mapped.Icon;
           const isFinding = !!entry.finding;
+          const isDone = actionKey === 'done';
+          const isError = actionKey === 'error';
 
           return (
-            <div key={i} className="relative pb-2.5">
-              <div className={`absolute -left-8 top-2.5 w-2 h-2 rounded-full z-10 ${isFinding ? 'bg-[#ff3b30]' : 'bg-white/20'}`} />
-              <div className={`rounded-lg px-3 py-2 ${isFinding ? 'glass bg-[#ff3b30]/[0.04] border-[#ff3b30]/10' : 'glass'}`}>
-                <div className="flex items-start gap-2">
-                  <IconComponent className={`w-3.5 h-3.5 flex-shrink-0 mt-0.5 ${isFinding ? 'text-[#ff3b30]/60' : 'text-white/25'}`} strokeWidth={1.5} />
-                  <p className={`text-sm flex-1 ${isFinding ? 'text-white/70' : 'text-white/40'}`}>{entry.detail}</p>
-                  <span className="text-[9px] text-white/15 flex-shrink-0">{entry.step}</span>
-                </div>
-                {entry.finding && (
-                  <span className="inline-block mt-1 ml-5 text-[9px] font-semibold text-[#ff3b30]/70 bg-[#ff3b30]/10 px-2 py-0.5 rounded">
-                    {entry.finding.severity} — {entry.finding.title}
+            <div key={i} className="relative pb-2">
+              {/* Timeline dot */}
+              <div className={`absolute -left-10 top-2.5 w-[22px] h-[22px] rounded-full flex items-center justify-center z-10 ${
+                isFinding ? 'bg-[#ff3b30]/20 border border-[#ff3b30]/40' :
+                isDone ? 'bg-white/10 border border-white/20' :
+                isError ? 'bg-[#ff3b30]/10 border border-[#ff3b30]/20' :
+                'bg-white/[0.04] border border-white/[0.08]'
+              }`}>
+                <IconComponent className={`w-3 h-3 ${
+                  isFinding ? 'text-[#ff3b30]' :
+                  isDone ? 'text-white/60' :
+                  isError ? 'text-[#ff3b30]/60' :
+                  'text-white/30'
+                }`} strokeWidth={2} />
+              </div>
+
+              {/* Content card */}
+              <div className={`rounded-lg px-4 py-2.5 ${
+                isFinding ? 'glass border-[#ff3b30]/15 bg-[#ff3b30]/[0.03]' :
+                isDone ? 'bg-white/[0.02] border border-white/[0.06]' :
+                'glass'
+              }`}>
+                {/* Action label + step number */}
+                <div className="flex items-center gap-2 mb-1">
+                  <span className={`text-[9px] font-semibold uppercase tracking-wider ${
+                    isFinding ? 'text-[#ff3b30]/60' :
+                    isDone ? 'text-white/30' :
+                    'text-white/20'
+                  }`}>
+                    {mapped.label}
                   </span>
+                  <span className="text-[9px] text-white/10">Step {entry.step}</span>
+                </div>
+
+                {/* Detail text */}
+                <p className={`text-sm leading-relaxed ${
+                  isFinding ? 'text-white/80 font-medium' :
+                  isDone ? 'text-white/40' :
+                  'text-white/50'
+                }`}>
+                  {entry.detail}
+                </p>
+
+                {/* Finding badge */}
+                {entry.finding && (
+                  <div className="mt-2">
+                    <span className="text-[10px] font-bold text-[#ff3b30] bg-[#ff3b30]/10 px-2.5 py-1 rounded-md">
+                      {entry.finding.severity} — {entry.finding.title}
+                    </span>
+                  </div>
                 )}
               </div>
             </div>
