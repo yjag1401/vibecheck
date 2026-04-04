@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Bot, Loader2, ChevronDown } from 'lucide-react';
+import AgentAnimation from './AgentAnimation';
 
 function AgentCard({ agent }) {
   const [expanded, setExpanded] = useState(false);
@@ -52,13 +53,7 @@ function AgentResults({ agents, loading, onRun }) {
     );
   }
   if (loading) {
-    return (
-      <div className="bg-surface border border-border rounded-xl p-8 text-center">
-        <Loader2 className="w-6 h-6 text-cyan mx-auto mb-3 animate-spin" />
-        <h3 className="text-sm font-semibold text-white mb-1">Analyzing...</h3>
-        <p className="text-dim text-xs">5 AI agents reviewing your codebase</p>
-      </div>
-    );
+    return <AgentAnimation />;
   }
 
   return (
