@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import ScanInput from './components/ScanInput';
 import ScanProgress from './components/ScanProgress';
 import ScanResults from './components/ScanResults';
@@ -9,10 +9,16 @@ function App() {
   const [state, setState] = useState('input'); // input | scanning | results | error | loading
   const [scanData, setScanData] = useState(null);
   const [error, setError] = useState(null);
+  const skipHashChange = useRef(false);
 
   // Load report from hash on startup (e.g. #/report/7)
   useEffect(() => {
     const loadFromHash = async () => {
+      // Skip if we just set the hash ourselves after a live scan
+      if (skipHashChange.current) {
+        skipHashChange.current = false;
+        return;
+      }
       const match = window.location.hash.match(/^#\/report\/(\d+)$/);
       if (!match) return;
       setState('loading');
@@ -54,6 +60,7 @@ function App() {
 
       setScanData(data);
       setState('results');
+      skipHashChange.current = true;
       window.location.hash = `#/report/${data.scanId}`;
     } catch (err) {
       setError(err.message);
