@@ -40,11 +40,12 @@ function SeverityDonut({ counts }) {
         <text x="80" y="75" textAnchor="middle" className="fill-white text-2xl font-black font-mono">{total}</text>
         <text x="80" y="95" textAnchor="middle" className="fill-[#888] text-[10px] uppercase tracking-widest">Issues</text>
       </svg>
-      <div className="flex gap-4 mt-3">
+      <div className="grid grid-cols-4 gap-2 mt-4 w-full">
         {items.map(item => (
-          <div key={item.label} className="flex items-center gap-1.5">
-            <div className="w-2 h-2 rounded-full" style={{ backgroundColor: item.color, boxShadow: `0 0 6px ${item.color}60` }} />
-            <span className="text-[9px] text-dim font-mono">{item.count}</span>
+          <div key={item.label} className="flex items-center gap-1.5 justify-center">
+            <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: item.color, boxShadow: `0 0 6px ${item.color}60` }} />
+            <span className="text-[9px] text-dim font-mono truncate">{item.label}</span>
+            <span className="text-[10px] font-bold font-mono" style={{ color: item.color }}>{item.count}</span>
           </div>
         ))}
       </div>
