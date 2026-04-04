@@ -5,6 +5,7 @@ import ScoreCircle from './ScoreCircle';
 import IssueCard from './IssueCard';
 import AgentResults from './AgentResults';
 import Badges from './Badges';
+import CodeHeatmap from './CodeHeatmap';
 
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement);
 
@@ -117,6 +118,9 @@ function ScanResults({ data, onReset }) {
           <span className="text-teal">{data.scanId}</span>
         </span>
       </div>
+
+      {/* Code Heatmap */}
+      <CodeHeatmap scanId={data.scanId} />
 
       {/* Filter tabs */}
       <div className="flex gap-2">

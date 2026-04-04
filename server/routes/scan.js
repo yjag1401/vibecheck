@@ -215,6 +215,92 @@ module.exports = function (db) {
     }
   });
 
+  // Get scan by ID (for shareable reports)
+  router.get('/scan/:scanId', (req, res) => {
+    const scan = db.prepare('SELECT * FROM scans WHERE id = ?').get(req.params.scanId);
+    if (!scan) return res.status(404).json({ error: 'Scan not found' });
+
+    const issues = db.prepare('SELECT * FROM issues WHERE scan_id = ?').all(scan.id);
+    res.json({
+      scanId: scan.id,
+      repoUrl: scan.repo_url,
+      repoPath: scan.repo_url,
+      score: scan.score,
+      verdict: scan.verdict,
+      verdictColor: getVerdictColor(scan.verdict),
+      totalIssues: scan.issue_count,
+      issues: issues.map(i => ({
+        scanner: i.scanner,
+        severity: i.severity,
+        title: i.title,
+        description: i.description,
+        filePath: i.file_path,
+        lineNumber: i.line_number,
+        codeSnippet: i.code_snippet,
+        fixSuggestion: i.fix_suggestion,
+      })),
+      severityCounts: {
+        CRITICAL: issues.filter(i => i.severity === 'CRITICAL').length,
+        HIGH: issues.filter(i => i.severity === 'HIGH').length,
+        MEDIUM: issues.filter(i => i.severity === 'MEDIUM').length,
+        LOW: issues.filter(i => i.severity === 'LOW').length,
+      },
+      scannerCounts: {
+        secrets: issues.filter(i => i.scanner === 'secrets').length,
+        dependencies: issues.filter(i => i.scanner === 'dependencies').length,
+        pii: issues.filter(i => i.scanner === 'pii').length,
+        codeSmells: issues.filter(i => i.scanner === 'code-smells').length,
+        simulation: issues.filter(i => i.scanner === 'simulation').length,
+      },
+      timestamp: scan.created_at,
+    });
+  });
+
+  // Get source files with issue annotations for heatmap
+  router.get('/scan/:scanId/files', (req, res) => {
+    const scan = db.prepare('SELECT * FROM scans WHERE id = ?').get(req.params.scanId);
+    if (!scan) return res.status(404).json({ error: 'Scan not found' });
+
+    const repoPath = scan.repo_url;
+    const issues = db.prepare('SELECT * FROM issues WHERE scan_id = ?').all(scan.id);
+
+    // Group issues by file
+    const issuesByFile = {};
+    for (const issue of issues) {
+      if (!issue.file_path) continue;
+      if (!issuesByFile[issue.file_path]) issuesByFile[issue.file_path] = [];
+      issuesByFile[issue.file_path].push({
+        lineNumber: issue.line_number,
+        severity: issue.severity,
+        title: issue.title,
+        description: issue.description,
+        scanner: issue.scanner,
+      });
+    }
+
+    // Read file contents
+    const files = [];
+    for (const [filePath, fileIssues] of Object.entries(issuesByFile)) {
+      const fullPath = path.join(repoPath, filePath);
+      let content = '';
+      try {
+        content = fs.readFileSync(fullPath, 'utf-8');
+      } catch {
+        content = '// File not accessible';
+      }
+      files.push({
+        path: filePath,
+        content,
+        issues: fileIssues,
+        totalLines: content.split('\n').length,
+      });
+    }
+
+    // Sort by number of issues (most problematic first)
+    files.sort((a, b) => b.issues.length - a.issues.length);
+    res.json({ files });
+  });
+
   // Scan history
   router.get('/history', (req, res) => {
     const scans = db.prepare('SELECT * FROM scans ORDER BY created_at DESC LIMIT 50').all();
