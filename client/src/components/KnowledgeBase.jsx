@@ -2,11 +2,11 @@ import { useState, useEffect } from 'react';
 import { Lock, Package, UserCheck, Code2, Bot, Brain, Loader2 } from 'lucide-react';
 
 const SCANNER_BADGES = {
-  'Secrets': { color: 'bg-red-500/20 text-red-400', Icon: Lock },
-  'Dependencies': { color: 'bg-purple-500/20 text-purple-400', Icon: Package },
-  'PII': { color: 'bg-yellow-500/20 text-yellow-400', Icon: UserCheck },
-  'Code Smells': { color: 'bg-orange-500/20 text-orange-400', Icon: Code2 },
-  'Simulation': { color: 'bg-blue-500/20 text-blue-400', Icon: Bot },
+  'Secrets': { Icon: Lock },
+  'Dependencies': { Icon: Package },
+  'PII': { Icon: UserCheck },
+  'Code Smells': { Icon: Code2 },
+  'Simulation': { Icon: Bot },
 };
 
 function classifyPattern(name) {
@@ -26,18 +26,14 @@ function KnowledgeBase({ onBack }) {
     Promise.all([
       fetch('/api/patterns').then(r => r.json()),
       fetch('/api/history').then(r => r.json()),
-    ]).then(([p, h]) => {
-      setPatterns(p);
-      setHistory(h);
-      setLoading(false);
-    });
+    ]).then(([p, h]) => { setPatterns(p); setHistory(h); setLoading(false); });
   }, []);
 
   if (loading) {
     return (
       <div className="text-center py-20">
-        <Loader2 className="w-10 h-10 text-teal mx-auto mb-4 animate-spin" />
-        <p className="text-slate-400">Loading knowledge base...</p>
+        <Loader2 className="w-8 h-8 text-white/30 mx-auto mb-4 animate-spin" />
+        <p className="text-white/30">Loading...</p>
       </div>
     );
   }
@@ -56,81 +52,65 @@ function KnowledgeBase({ onBack }) {
 
   return (
     <div className="fade-in space-y-8">
-      {/* Header */}
       <div className="text-center">
-        <Brain className="w-12 h-12 text-teal mx-auto mb-3" strokeWidth={1.5} />
-        <h2 className="text-3xl font-bold text-white">Knowledge Base</h2>
-        <p className="text-slate-400 mt-2">VibeCheck learns from every scan. Here's what AI-generated code gets wrong most often.</p>
+        <Brain className="w-10 h-10 text-white/20 mx-auto mb-3" strokeWidth={1} />
+        <h2 className="text-3xl font-bold text-white tracking-tight">Knowledge Base</h2>
+        <p className="text-white/30 mt-2">What AI-generated code gets wrong most often.</p>
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-4 gap-4">
+      <div className="grid grid-cols-4 gap-3">
         {[
-          { label: 'Repos Scanned', value: history.length, color: 'text-teal' },
-          { label: 'Patterns Learned', value: patterns.length, color: 'text-purple-400' },
-          { label: 'Total Issues Found', value: totalIssues.toLocaleString(), color: 'text-yellow-400' },
-          { label: 'Top Mistake Frequency', value: `${maxFreq}x`, color: 'text-red-400' },
+          { label: 'Repos Scanned', value: history.length },
+          { label: 'Patterns Learned', value: patterns.length },
+          { label: 'Total Issues', value: totalIssues.toLocaleString() },
+          { label: 'Top Frequency', value: `${maxFreq}x` },
         ].map(s => (
-          <div key={s.label} className="bg-surface rounded-xl p-5 text-center">
-            <div className={`text-3xl font-bold ${s.color}`}>{s.value}</div>
-            <div className="text-xs text-slate-400 mt-1">{s.label}</div>
+          <div key={s.label} className="glass rounded-xl p-5 text-center">
+            <div className="text-2xl font-bold text-white">{s.value}</div>
+            <div className="text-[10px] text-white/25 mt-1">{s.label}</div>
           </div>
         ))}
       </div>
 
-      {/* Scanner type breakdown */}
-      <div className="bg-surface rounded-xl p-6">
-        <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4">Issues by Category</h3>
+      <div className="glass rounded-xl p-6">
+        <h3 className="text-xs font-semibold text-white/25 uppercase tracking-widest mb-4">By Category</h3>
         <div className="grid grid-cols-5 gap-3">
           {Object.entries(SCANNER_BADGES).map(([type, badge]) => {
             const data = scannerGroups[type] || { count: 0, totalFreq: 0 };
             return (
               <div key={type} className="text-center">
-                <badge.Icon className="w-6 h-6 mx-auto mb-1 text-slate-400" strokeWidth={1.5} />
+                <badge.Icon className="w-5 h-5 mx-auto mb-1 text-white/25" strokeWidth={1.5} />
                 <div className="text-lg font-bold text-white">{data.totalFreq}</div>
-                <div className="text-[10px] text-slate-400">{type}</div>
-                <div className="text-[10px] text-slate-500">{data.count} patterns</div>
+                <div className="text-[10px] text-white/25">{type}</div>
+                <div className="text-[10px] text-white/15">{data.count} patterns</div>
               </div>
             );
           })}
         </div>
       </div>
 
-      {/* Leaderboard */}
-      <div className="bg-surface rounded-xl p-6">
-        <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4">
-          Most Common AI Mistakes
-        </h3>
-        <div className="space-y-2">
+      <div className="glass rounded-xl p-6">
+        <h3 className="text-xs font-semibold text-white/25 uppercase tracking-widest mb-5">Most Common AI Mistakes</h3>
+        <div className="space-y-3">
           {topPatterns.map((p, i) => {
-            const width = Math.max((p.frequency / maxFreq) * 100, 8);
+            const width = Math.max((p.frequency / maxFreq) * 100, 6);
             const type = classifyPattern(p.error_type);
-            const badge = SCANNER_BADGES[type] || SCANNER_BADGES['Code Smells'];
 
             return (
               <div key={i} className="flex items-center gap-3">
-                <span className="text-sm font-bold text-slate-500 w-6 text-right">
-                  {i + 1}.
-                </span>
+                <span className="text-xs font-bold text-white/20 w-5 text-right">{i + 1}</span>
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
-                    <span className="text-sm text-white font-medium truncate">
+                    <span className="text-sm text-white/70 font-medium truncate">
                       {p.error_type.replace('Detected', '').replace('Exposed', '').trim()}
                     </span>
-                    <span className={`text-[10px] px-1.5 py-0.5 rounded ${badge.color} flex-shrink-0`}>
-                      {type}
-                    </span>
+                    <span className="text-[9px] text-white/20 bg-white/[0.04] px-1.5 py-0.5 rounded flex-shrink-0">{type}</span>
                   </div>
-                  <div className="h-2 bg-slate-700/50 rounded-full overflow-hidden">
-                    <div
-                      className="h-full rounded-full bg-gradient-to-r from-teal to-cyan-400 transition-all duration-700"
-                      style={{ width: `${width}%` }}
-                    />
+                  <div className="h-1.5 bg-white/[0.04] rounded-full overflow-hidden">
+                    <div className="h-full rounded-full bg-white/30 transition-all duration-700" style={{ width: `${width}%` }} />
                   </div>
                 </div>
-                <span className="text-sm font-bold text-teal w-14 text-right">
-                  {p.frequency}x
-                </span>
+                <span className="text-sm font-semibold text-white/50 w-14 text-right">{p.frequency}x</span>
               </div>
             );
           })}
@@ -138,10 +118,7 @@ function KnowledgeBase({ onBack }) {
       </div>
 
       <div className="text-center">
-        <button
-          onClick={onBack}
-          className="px-6 py-2 bg-teal/20 text-teal rounded-lg hover:bg-teal/30 transition-colors"
-        >
+        <button onClick={onBack} className="glass px-6 py-2 text-white/50 rounded-lg hover:text-white transition-colors">
           Back to Scanner
         </button>
       </div>

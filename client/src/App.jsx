@@ -69,33 +69,33 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-bg">
+    <div className="min-h-screen bg-[#050505]">
       {/* Header */}
-      <header className="border-b border-slate-700/50 px-6 py-4 backdrop-blur-sm bg-bg/80 sticky top-0 z-50">
+      <header className="glass sticky top-0 z-50 px-6 py-4">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <div
             className="flex items-center gap-3 cursor-pointer"
             onClick={handleReset}
           >
-            <div className="w-10 h-10 bg-gradient-to-br from-teal to-cyan-500 rounded-xl flex items-center justify-center text-bg font-black text-lg shadow-lg shadow-teal/20">
+            <div className="w-9 h-9 bg-white rounded-lg flex items-center justify-center text-[#050505] font-black text-sm">
               VC
             </div>
             <div>
-              <h1 className="text-xl font-extrabold text-white tracking-tight">VibeCheck</h1>
-              <p className="text-[10px] text-slate-400 tracking-widest uppercase">AI Code Auditor</p>
+              <h1 className="text-lg font-bold text-white tracking-tight">VibeCheck</h1>
+              <p className="text-[10px] text-white/30 tracking-widest uppercase">AI Code Auditor</p>
             </div>
           </div>
           <div className="flex items-center gap-4">
             <button
               onClick={() => setState('kb')}
-              className={`text-sm transition-colors ${state === 'kb' ? 'text-teal' : 'text-slate-400 hover:text-white'}`}
+              className={`text-sm transition-colors ${state === 'kb' ? 'text-white' : 'text-white/40 hover:text-white'}`}
             >
               Knowledge Base
             </button>
             {state !== 'input' && state !== 'kb' && (
               <button
                 onClick={handleReset}
-                className="text-sm text-slate-400 hover:text-white transition-colors"
+                className="text-sm text-white/40 hover:text-white transition-colors"
               >
                 New Scan
               </button>
@@ -103,7 +103,7 @@ function App() {
             {state === 'kb' && (
               <button
                 onClick={handleReset}
-                className="text-sm text-slate-400 hover:text-white transition-colors"
+                className="text-sm text-white/40 hover:text-white transition-colors"
               >
                 New Scan
               </button>
@@ -118,8 +118,8 @@ function App() {
         {state === 'kb' && <KnowledgeBase onBack={handleReset} />}
         {state === 'loading' && (
           <div className="text-center py-20 fade-in">
-            <Loader2 className="w-10 h-10 text-teal mx-auto mb-4 animate-spin" />
-            <p className="text-slate-400">Loading report...</p>
+            <Loader2 className="w-8 h-8 text-white/50 mx-auto mb-4 animate-spin" />
+            <p className="text-white/40">Loading report...</p>
           </div>
         )}
         {state === 'scanning' && <ScanProgress />}
@@ -128,12 +128,12 @@ function App() {
         )}
         {state === 'error' && (
           <div className="text-center py-20 fade-in">
-            <AlertTriangle className="w-14 h-14 text-red-400 mx-auto mb-4" strokeWidth={1.5} />
-            <h2 className="text-2xl font-bold text-red-400 mb-2">Scan Failed</h2>
-            <p className="text-slate-400 mb-6">{error}</p>
+            <AlertTriangle className="w-12 h-12 text-white/60 mx-auto mb-4" strokeWidth={1.5} />
+            <h2 className="text-2xl font-bold text-white mb-2">Scan Failed</h2>
+            <p className="text-white/40 mb-6">{error}</p>
             <button
               onClick={handleReset}
-              className="px-6 py-2 bg-teal/20 text-teal rounded-lg hover:bg-teal/30 transition-colors"
+              className="glass px-6 py-2 text-white rounded-lg hover:bg-white/10 transition-colors"
             >
               Try Again
             </button>

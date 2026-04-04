@@ -2,11 +2,8 @@ import { useState } from 'react';
 import { ShieldCheck } from 'lucide-react';
 
 function generateYAML(repoUrl) {
-  const repoName = repoUrl.replace(/.*\//, '').replace('.git', '') || 'my-app';
   return `# VibeCheck — AI Code Auditor
-# Automatically scans your code for security vulnerabilities,
-# leaked secrets, PII exposure, and code smells on every push.
-#
+# Scans for security vulnerabilities, leaked secrets, PII, and code smells.
 # Drop this file in: .github/workflows/vibecheck.yml
 
 name: VibeCheck Audit
@@ -21,83 +18,41 @@ jobs:
   vibecheck:
     name: Security Audit
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: '18'
-
       - name: Install VibeCheck
         run: |
           git clone https://github.com/Arun07AK/vibecheck.git /tmp/vibecheck
           cd /tmp/vibecheck/server && npm install --production
-
-      - name: Run VibeCheck Scan
+      - name: Run Scan
         run: |
           cd /tmp/vibecheck/server && node -e "
             const { initDB } = require('./db/database');
             const db = initDB();
-            const secretScanner = require('./scanners/secretScanner');
-            const depScanner = require('./scanners/depScanner');
-            const piiScanner = require('./scanners/piiScanner');
-            const codeSmellScanner = require('./scanners/codeSmellScanner');
-
+            const s1 = require('./scanners/secretScanner');
+            const s2 = require('./scanners/depScanner');
+            const s3 = require('./scanners/piiScanner');
+            const s4 = require('./scanners/codeSmellScanner');
             (async () => {
-              const repoPath = process.env.GITHUB_WORKSPACE;
-              const [secrets, deps, pii, smells] = await Promise.all([
-                secretScanner.scan(repoPath),
-                depScanner.scan(repoPath),
-                piiScanner.scan(repoPath),
-                codeSmellScanner.scan(repoPath),
-              ]);
-              const issues = [...secrets, ...deps, ...pii, ...smells];
+              const p = process.env.GITHUB_WORKSPACE;
+              const issues = [].concat(...await Promise.all([s1.scan(p),s2.scan(p),s3.scan(p),s4.scan(p)]));
               let score = 100;
-              for (const i of issues) {
-                if (i.severity === 'CRITICAL') score -= 15;
-                else if (i.severity === 'HIGH') score -= 8;
-                else if (i.severity === 'MEDIUM') score -= 3;
-                else score -= 1;
-              }
+              issues.forEach(i => { score -= i.severity==='CRITICAL'?15:i.severity==='HIGH'?8:i.severity==='MEDIUM'?3:1; });
               score = Math.max(0, score);
-              const verdict = score >= 70 ? 'GO' : score >= 40 ? 'WARNING' : 'NO-GO';
-
-              console.log('\\n===== VibeCheck Report =====');
-              console.log('Score: ' + score + '/100 — ' + verdict);
-              console.log('Issues: ' + issues.length);
-              console.log('  CRITICAL: ' + issues.filter(i => i.severity === 'CRITICAL').length);
-              console.log('  HIGH: ' + issues.filter(i => i.severity === 'HIGH').length);
-              console.log('  MEDIUM: ' + issues.filter(i => i.severity === 'MEDIUM').length);
-              console.log('  LOW: ' + issues.filter(i => i.severity === 'LOW').length);
-              console.log('============================\\n');
-
-              if (issues.length > 0) {
-                for (const i of issues) {
-                  console.log('[' + i.severity + '] ' + i.title + ' — ' + (i.filePath || 'N/A') + ':' + (i.lineNumber || '?'));
-                }
-              }
-
-              if (score < 40) {
-                console.log('\\n❌ VibeCheck FAILED — score below 40');
-                process.exit(1);
-              } else {
-                console.log('\\n✅ VibeCheck PASSED');
-              }
+              console.log('VibeCheck: ' + score + '/100 — ' + (score>=70?'GO':score>=40?'WARNING':'NO-GO'));
+              console.log(issues.length + ' issues found');
+              issues.forEach(i => console.log('[' + i.severity + '] ' + i.title + ' — ' + (i.filePath||'N/A')));
+              if (score < 40) { console.log('FAILED'); process.exit(1); }
             })();
-          "
-
-      - name: Upload Results
-        if: always()
-        run: echo "VibeCheck scan complete. Check logs above for details."`;
+          "`;
 }
 
 function ProtectRepo({ repoUrl }) {
   const [showYAML, setShowYAML] = useState(false);
   const [copied, setCopied] = useState(false);
-
   const yaml = generateYAML(repoUrl);
 
   const handleCopy = () => {
@@ -117,17 +72,17 @@ function ProtectRepo({ repoUrl }) {
   };
 
   return (
-    <div className="bg-surface rounded-2xl p-6 space-y-4">
+    <div className="glass rounded-2xl p-6 space-y-4">
       <div className="flex items-center gap-3">
-        <ShieldCheck className="w-6 h-6 text-teal" strokeWidth={1.5} />
+        <ShieldCheck className="w-5 h-5 text-white/30" strokeWidth={1.5} />
         <div className="flex-1">
-          <h3 className="text-white font-bold">Protect This Repo</h3>
-          <p className="text-xs text-slate-400">Add a GitHub Action that runs VibeCheck on every push — automatic security auditing</p>
+          <h3 className="text-white font-semibold">Protect This Repo</h3>
+          <p className="text-xs text-white/25">GitHub Action that runs VibeCheck on every push</p>
         </div>
         <button
           onClick={() => setShowYAML(!showYAML)}
-          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-            showYAML ? 'bg-teal/20 text-teal' : 'bg-teal text-bg hover:bg-teal/90'
+          className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+            showYAML ? 'glass text-white' : 'bg-white text-black hover:bg-white/90'
           }`}
         >
           {showYAML ? 'Hide' : 'Get GitHub Action'}
@@ -137,25 +92,19 @@ function ProtectRepo({ repoUrl }) {
       {showYAML && (
         <div className="space-y-3 fade-in">
           <div className="flex items-center gap-2">
-            <span className="text-xs text-slate-400 flex-1">
-              Save as <code className="text-teal bg-slate-800 px-1.5 py-0.5 rounded">.github/workflows/vibecheck.yml</code> in your repo
+            <span className="text-xs text-white/25 flex-1">
+              Save as <code className="text-white/40 bg-white/[0.04] px-1.5 py-0.5 rounded">.github/workflows/vibecheck.yml</code>
             </span>
-            <button
-              onClick={handleCopy}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-                copied ? 'bg-green-500/20 text-green-400' : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
-              }`}
+            <button onClick={handleCopy}
+              className={`glass px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${copied ? 'text-white' : 'text-white/40 hover:text-white'}`}
             >
-              {copied ? 'Copied!' : 'Copy YAML'}
+              {copied ? 'Copied' : 'Copy'}
             </button>
-            <button
-              onClick={handleDownload}
-              className="px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-700 text-slate-300 hover:bg-slate-600 transition-colors"
-            >
+            <button onClick={handleDownload} className="glass px-3 py-1.5 rounded-lg text-xs font-medium text-white/40 hover:text-white transition-colors">
               Download
             </button>
           </div>
-          <pre className="bg-slate-900 rounded-lg p-4 text-xs text-slate-300 overflow-x-auto max-h-80 overflow-y-auto font-mono leading-relaxed">
+          <pre className="bg-white/[0.02] border border-white/[0.04] rounded-lg p-4 text-xs text-white/35 overflow-x-auto max-h-72 overflow-y-auto font-mono leading-relaxed">
             {yaml}
           </pre>
         </div>
