@@ -4,6 +4,7 @@ import { Pie, Bar } from 'react-chartjs-2';
 import ScoreCircle from './ScoreCircle';
 import IssueCard from './IssueCard';
 import AgentResults from './AgentResults';
+import Badges from './Badges';
 
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement);
 
@@ -97,6 +98,9 @@ function ScanResults({ data, onReset }) {
           <Bar data={scannerChartData} options={barOptions} />
         </div>
       </div>
+
+      {/* Achievement Badges */}
+      <Badges data={data} />
 
       {/* Scan info */}
       <div className="bg-surface rounded-xl p-4 flex items-center gap-6 text-sm text-slate-400">
