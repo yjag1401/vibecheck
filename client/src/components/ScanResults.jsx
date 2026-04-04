@@ -14,6 +14,12 @@ function ScanResults({ data, onReset }) {
   const [filter, setFilter] = useState('all');
   const [agents, setAgents] = useState(null);
   const [agentsLoading, setAgentsLoading] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const [badgeCopied, setBadgeCopied] = useState(false);
+
+  const reportUrl = `${window.location.origin}/#/report/${data.scanId}`;
+  const badgeUrl = `${window.location.origin}/api/badge/${data.scanId}`;
+  const badgeMarkdown = `[![VibeCheck](${badgeUrl})](${reportUrl})`;
 
   const filteredIssues = filter === 'all'
     ? data.issues
@@ -104,20 +110,39 @@ function ScanResults({ data, onReset }) {
       {/* Achievement Badges */}
       <Badges data={data} />
 
-      {/* Scan info */}
-      <div className="bg-surface rounded-xl p-4 flex items-center gap-6 text-sm text-slate-400">
-        <span>
-          <span className="text-slate-500">Repo:</span>{' '}
-          <span className="text-white font-mono">{data.repoUrl}</span>
-        </span>
-        <span>
-          <span className="text-slate-500">Issues:</span>{' '}
-          <span className="text-white font-bold">{data.totalIssues}</span>
-        </span>
-        <span>
-          <span className="text-slate-500">Scan ID:</span>{' '}
-          <span className="text-teal">{data.scanId}</span>
-        </span>
+      {/* Scan info + Share */}
+      <div className="bg-surface rounded-xl p-4 space-y-3">
+        <div className="flex items-center gap-6 text-sm text-slate-400">
+          <span>
+            <span className="text-slate-500">Repo:</span>{' '}
+            <span className="text-white font-mono">{data.repoUrl}</span>
+          </span>
+          <span>
+            <span className="text-slate-500">Issues:</span>{' '}
+            <span className="text-white font-bold">{data.totalIssues}</span>
+          </span>
+          <span>
+            <span className="text-slate-500">Scan ID:</span>{' '}
+            <span className="text-teal">{data.scanId}</span>
+          </span>
+          <button
+            onClick={() => { navigator.clipboard.writeText(reportUrl); setCopied(true); setTimeout(() => setCopied(false), 2000); }}
+            className={`ml-auto px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${copied ? 'bg-green-500/20 text-green-400' : 'bg-teal/20 text-teal hover:bg-teal/30'}`}
+          >
+            {copied ? 'Copied!' : 'Share Report'}
+          </button>
+        </div>
+        {/* Badge embed */}
+        <div className="flex items-center gap-3">
+          <img src={badgeUrl} alt="VibeCheck badge" className="h-5" />
+          <code className="text-xs text-slate-500 bg-slate-800 px-2 py-1 rounded flex-1 truncate">{badgeMarkdown}</code>
+          <button
+            onClick={() => { navigator.clipboard.writeText(badgeMarkdown); setBadgeCopied(true); setTimeout(() => setBadgeCopied(false), 2000); }}
+            className={`text-xs px-2 py-1 rounded transition-colors ${badgeCopied ? 'text-green-400' : 'text-slate-400 hover:text-white'}`}
+          >
+            {badgeCopied ? 'Copied!' : 'Copy'}
+          </button>
+        </div>
       </div>
 
       {/* AI Simulation Timeline */}

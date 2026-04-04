@@ -1,12 +1,34 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import ScanInput from './components/ScanInput';
 import ScanProgress from './components/ScanProgress';
 import ScanResults from './components/ScanResults';
 
 function App() {
-  const [state, setState] = useState('input'); // input | scanning | results | error
+  const [state, setState] = useState('input'); // input | scanning | results | error | loading
   const [scanData, setScanData] = useState(null);
   const [error, setError] = useState(null);
+
+  // Load report from hash on startup (e.g. #/report/7)
+  useEffect(() => {
+    const loadFromHash = async () => {
+      const match = window.location.hash.match(/^#\/report\/(\d+)$/);
+      if (!match) return;
+      setState('loading');
+      try {
+        const res = await fetch(`/api/scan/${match[1]}`);
+        if (!res.ok) throw new Error('Report not found');
+        const data = await res.json();
+        setScanData(data);
+        setState('results');
+      } catch (err) {
+        setError(err.message);
+        setState('error');
+      }
+    };
+    loadFromHash();
+    window.addEventListener('hashchange', loadFromHash);
+    return () => window.removeEventListener('hashchange', loadFromHash);
+  }, []);
 
   const handleScan = async ({ url, localPath, enableSimulation }) => {
     setState('scanning');
@@ -30,6 +52,7 @@ function App() {
 
       setScanData(data);
       setState('results');
+      window.location.hash = `#/report/${data.scanId}`;
     } catch (err) {
       setError(err.message);
       setState('error');
@@ -40,6 +63,7 @@ function App() {
     setState('input');
     setScanData(null);
     setError(null);
+    window.location.hash = '';
   };
 
   return (
@@ -70,6 +94,12 @@ function App() {
       {/* Main */}
       <main className="max-w-6xl mx-auto px-6 py-8">
         {state === 'input' && <ScanInput onScan={handleScan} />}
+        {state === 'loading' && (
+          <div className="text-center py-20 fade-in">
+            <div className="inline-block animate-spin text-4xl mb-4">&#9881;</div>
+            <p className="text-slate-400">Loading report...</p>
+          </div>
+        )}
         {state === 'scanning' && <ScanProgress />}
         {state === 'results' && scanData && (
           <ScanResults data={scanData} onReset={handleReset} />
