@@ -50,8 +50,8 @@ function App() {
   const handleReset = () => { setState('input'); setScanData(null); setError(null); window.location.hash = ''; };
 
   return (
-    <div className="min-h-screen bg-bg">
-      <header className="border-b border-border px-6 py-3 sticky top-0 z-50 bg-bg">
+    <div className="min-h-screen bg-[#0A0A0F]">
+      <header className="border-b border-border px-6 py-3 sticky top-0 z-50 bg-[#0A0A0F]">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3 cursor-pointer" onClick={handleReset}>
             <div className="w-8 h-8 bg-cyan rounded-md flex items-center justify-center text-bg font-black text-xs">VC</div>
