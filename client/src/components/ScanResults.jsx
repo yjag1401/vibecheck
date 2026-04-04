@@ -6,6 +6,7 @@ import IssueCard from './IssueCard';
 import AgentResults from './AgentResults';
 import Badges from './Badges';
 import CodeHeatmap from './CodeHeatmap';
+import ProtectRepo from './ProtectRepo';
 import SimulationResults from './SimulationResults';
 
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement);
@@ -199,6 +200,9 @@ function ScanResults({ data, onReset }) {
           setAgentsLoading(false);
         }}
       />
+
+      {/* Protect This Repo */}
+      <ProtectRepo repoUrl={data.repoUrl} />
     </div>
   );
 }
