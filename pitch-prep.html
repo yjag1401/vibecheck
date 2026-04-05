@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VibeCheck — Pitch Prep</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Inter', sans-serif; background: #0A0A0F; color: #e5e7eb; min-height: 100vh; }
+  h1,h2,h3,h4 { font-family: 'Space Grotesk', sans-serif; }
+  .container { max-width: 900px; margin: 0 auto; padding: 40px 24px; }
+
+  /* Header */
+  .header { text-align: center; margin-bottom: 48px; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 32px; }
+  .header h1 { font-size: 2.5rem; color: #fff; margin-bottom: 8px; }
+  .header h1 span { color: #00F0FF; }
+  .header p { color: #888; font-size: 14px; }
+  .header .badge { display: inline-block; background: rgba(0,240,255,0.1); color: #00F0FF; padding: 4px 16px; border-radius: 20px; font-size: 12px; font-family: 'JetBrains Mono', monospace; margin-top: 12px; border: 1px solid rgba(0,240,255,0.2); }
+
+  /* Tabs */
+  .tabs { display: flex; gap: 4px; margin-bottom: 32px; background: rgba(255,255,255,0.03); border-radius: 12px; padding: 4px; border: 1px solid rgba(255,255,255,0.06); }
+  .tab { flex: 1; padding: 12px; text-align: center; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 600; color: #888; transition: all 0.2s; text-transform: uppercase; letter-spacing: 0.05em; }
+  .tab.active { background: #00F0FF; color: #0A0A0F; }
+  .tab:hover:not(.active) { color: #fff; background: rgba(255,255,255,0.05); }
+
+  /* Sections */
+  .section { display: none; }
+  .section.active { display: block; }
+
+  /* Cards */
+  .card { background: rgba(14,14,20,0.72); border: 1px solid rgba(244,246,255,0.08); border-radius: 16px; padding: 24px; margin-bottom: 16px; backdrop-filter: blur(12px); }
+  .card h3 { color: #fff; margin-bottom: 12px; font-size: 18px; }
+  .card h4 { color: #00F0FF; margin-bottom: 8px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.1em; font-family: 'JetBrains Mono', monospace; }
+
+  /* Script lines */
+  .script-line { background: rgba(0,240,255,0.04); border-left: 3px solid #00F0FF; padding: 16px 20px; margin: 12px 0; border-radius: 0 12px 12px 0; font-size: 15px; line-height: 1.7; color: #e5e7eb; }
+  .script-line .speaker { color: #00F0FF; font-weight: 700; font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em; display: block; margin-bottom: 4px; font-family: 'JetBrains Mono', monospace; }
+  .action { color: #888; font-style: italic; font-size: 13px; margin: 8px 0; padding: 8px 16px; border-left: 2px solid #333; }
+
+  /* Timer */
+  .timer { display: inline-block; background: rgba(255,78,205,0.1); color: #FF4ECD; padding: 2px 10px; border-radius: 6px; font-size: 11px; font-family: 'JetBrains Mono', monospace; margin-bottom: 8px; }
+
+  /* Q&A Table */
+  .qa-table { width: 100%; border-collapse: collapse; }
+  .qa-table td { padding: 16px; border-bottom: 1px solid rgba(255,255,255,0.04); vertical-align: top; font-size: 14px; }
+  .qa-table td:first-child { color: #fff; font-weight: 600; width: 40%; }
+  .qa-table td:last-child { color: #aaa; }
+  .qa-table .who { color: #00F0FF; font-size: 11px; font-family: 'JetBrains Mono', monospace; display: block; margin-top: 4px; }
+
+  /* Checklist */
+  .checklist label { display: flex; align-items: center; gap: 12px; padding: 12px 16px; margin: 4px 0; border-radius: 8px; cursor: pointer; font-size: 14px; transition: background 0.2s; }
+  .checklist label:hover { background: rgba(255,255,255,0.03); }
+  .checklist input[type="checkbox"] { width: 18px; height: 18px; accent-color: #00F0FF; }
+  .checklist input:checked + span { color: #555; text-decoration: line-through; }
+
+  /* Stats */
+  .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 20px 0; }
+  .stat { text-align: center; padding: 16px; background: rgba(0,240,255,0.04); border: 1px solid rgba(0,240,255,0.1); border-radius: 12px; }
+  .stat .value { font-size: 24px; font-weight: 700; color: #00F0FF; font-family: 'JetBrains Mono', monospace; }
+  .stat .label { font-size: 10px; color: #888; text-transform: uppercase; letter-spacing: 0.1em; margin-top: 4px; }
+
+  /* Roles */
+  .role-card { display: flex; gap: 16px; align-items: center; padding: 16px; background: rgba(255,255,255,0.02); border-radius: 12px; margin: 8px 0; border: 1px solid rgba(255,255,255,0.04); }
+  .role-avatar { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 14px; color: #0A0A0F; }
+  .role-info .name { font-weight: 600; color: #fff; }
+  .role-info .desc { font-size: 13px; color: #888; margin-top: 2px; }
+
+  /* Emergency */
+  .emergency { background: rgba(255,59,48,0.05); border: 1px solid rgba(255,59,48,0.15); border-radius: 12px; padding: 16px; margin: 8px 0; }
+  .emergency .problem { color: #FF3B30; font-weight: 600; }
+  .emergency .solution { color: #aaa; margin-top: 4px; font-size: 13px; }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1>Vibe<span>Check</span></h1>
+    <p>Pitch Preparation Guide — Eclipse 6.0</p>
+    <div class="badge">TEAM PIPPED PIPERS</div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" onclick="showTab('script')">Script</div>
+    <div class="tab" onclick="showTab('qa')">Q&A</div>
+    <div class="tab" onclick="showTab('roles')">Roles</div>
+    <div class="tab" onclick="showTab('checklist')">Checklist</div>
+    <div class="tab" onclick="showTab('emergency')">Emergency</div>
+  </div>
+
+  <!-- SCRIPT TAB -->
+  <div id="script" class="section active">
+    <div class="stats-grid">
+      <div class="stat"><div class="value">24.7%</div><div class="label">AI code has flaws</div></div>
+      <div class="stat"><div class="value">19.7%</div><div class="label">Hallucinated pkgs</div></div>
+      <div class="stat"><div class="value">34</div><div class="label">Repos scanned</div></div>
+      <div class="stat"><div class="value">11.5K</div><div class="label">Issues found</div></div>
+    </div>
+
+    <div class="card">
+      <div class="timer">0:00 — 0:30</div>
+      <h3>Opening</h3>
+      <div class="script-line">
+        <span class="speaker">Dev says:</span>
+        Hey, we're Pipped Pipers. We built VibeCheck — an AI-powered code auditor for vibe-coded apps. Think of it as Lighthouse, but for security.
+      </div>
+      <div class="script-line">
+        <span class="speaker">Dev says:</span>
+        AI writes 80% of new code today, but 24.7% of it has security flaws. Cursor and Copilot let anyone build an app in minutes — but nobody's checking if that code is safe to ship. VibeCheck checks it.
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="timer">0:30 — 2:30</div>
+      <h3>Live Demo — Broken App</h3>
+      <div class="action">Paste broken app URL/path, simulation ON, click Scan</div>
+      <div class="script-line">
+        <span class="speaker">Dev says:</span>
+        Let me show you. Here's a real vibe-coded task manager. Four scanners run in parallel — secrets, dependencies, PII, code smells. Meanwhile, our AI simulation actually starts the app in a headless browser and tries to break it.
+      </div>
+      <div class="action">Score reveals — point to grade and verdict</div>
+      <div class="script-line">
+        <span class="speaker">Dev says:</span>
+        36 out of 100. F. NO-GO — Blocks Merge. It found a hardcoded API key, eval() in production, innerHTML XSS, and PII in console logs.
+      </div>
+      <div class="action">Scroll to AI Simulation section</div>
+      <div class="script-line">
+        <span class="speaker">Dev says:</span>
+        Here's what makes us different. Claude Sonnet 4.6 opened this app in a real browser, typed an XSS payload into the input, clicked Add, and — alert() actually fired. That's not a warning. That's a verified exploit. No human wrote these test cases. The AI decided what to attack.
+      </div>
+      <div class="action">Click View Code Heatmap</div>
+      <div class="script-line">
+        <span class="speaker">Dev says:</span>
+        And here's the source code with every issue highlighted line by line.
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="timer">2:30 — 3:00</div>
+      <h3>Live Demo — Clean App</h3>
+      <div class="action">Click New Scan, scan clean app</div>
+      <div class="script-line">
+        <span class="speaker">Dev says:</span>
+        Now a well-built app. 92. A minus. GO — Safe to Ship. Same attacks — nothing broke.
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="timer">3:00 — 3:30</div>
+      <h3>AI Agents</h3>
+      <div class="action">Click Run AI Agents on broken app</div>
+      <div class="script-line">
+        <span class="speaker">Dev says:</span>
+        We don't just find problems — we fix them. Five AI agents analyze the code: Security, UX, Performance, Scalability, Production Readiness. Each generates a copy-paste prompt for Cursor. AI auditing AI, then AI fixing AI.
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="timer">3:30 — 4:00</div>
+      <h3>Knowledge Base</h3>
+      <div class="action">Click Knowledge Base in header</div>
+      <div class="script-line">
+        <span class="speaker">Dev says:</span>
+        Every scan makes VibeCheck smarter. We've scanned 34 repos, found over 11,000 issues. The number one AI mistake? Leaking email addresses — over 4,000 times. This isn't a static tool. It learns.
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="timer">4:00 — 4:30</div>
+      <h3>GitHub Action</h3>
+      <div class="action">Go to results, click Get GitHub Action</div>
+      <div class="script-line">
+        <span class="speaker">Dev says:</span>
+        Last thing. Drop this one YAML file in your repo — every commit is automatically audited. Score below 40, CI fails. We already tested it. That push failed because VibeCheck caught the vulnerabilities.
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="timer">4:30 — 5:00</div>
+      <h3>The Close</h3>
+      <div class="script-line">
+        <span class="speaker">Dev says:</span>
+        SonarQube scans code. Snyk scans code. We scan, simulate, learn, and generate the fix. <strong>VibeCheck. Lighthouse for vibe-coded apps.</strong>
+      </div>
+    </div>
+  </div>
+
+  <!-- Q&A TAB -->
+  <div id="qa" class="section">
+    <div class="card">
+      <h3>Jury Q&A — Keep answers under 30 seconds</h3>
+      <table class="qa-table">
+        <tr>
+          <td>How is this different from SonarQube/Snyk?<span class="who">Dev answers</span></td>
+          <td>They do static analysis only. We also run the app with an AI agent that clicks, types, and tests like a real user. And we learn from every scan.</td>
+        </tr>
+        <tr>
+          <td>Does the AI simulation actually work?<span class="who">Arun answers</span></td>
+          <td>Yes — Claude Sonnet 4.6 via Playwright MCP gets 21 browser tools. It reads the accessibility tree, types XSS payloads, and confirmed a vulnerability by triggering alert() in the browser. Happy to run it live.</td>
+        </tr>
+        <tr>
+          <td>What about false positives?<span class="who">Arun answers</span></td>
+          <td>Critical findings like leaked API keys are high-confidence regex matches. For XSS, we compare innerHTML vs textContent — only flag if the payload is actually unescaped. Simulation findings include the reproduction path.</td>
+        </tr>
+        <tr>
+          <td>Will this scale?<span class="who">Arun answers</span></td>
+          <td>Scanners run in parallel, under 5 seconds for most repos. For scale, we'd add a worker queue and hosted browser pool.</td>
+        </tr>
+        <tr>
+          <td>Why not just use ESLint?<span class="who">Dev answers</span></td>
+          <td>ESLint catches style issues. We catch leaked Stripe keys, hallucinated npm packages that don't exist, PII exposure, and runtime crashes that no linter can find.</td>
+        </tr>
+        <tr>
+          <td>What's the tech stack?<span class="who">Arun answers</span></td>
+          <td>React, Node, Express, Playwright MCP, Claude Sonnet 4.6 via Anthropic API, SQLite, OSV.dev for CVE data.</td>
+        </tr>
+        <tr>
+          <td>What's the knowledge base?<span class="who">Dev answers</span></td>
+          <td>Every scan stores failure patterns with frequency. After 34 scans we know the top 50 mistakes AI makes. Future scans use this data to prioritize testing.</td>
+        </tr>
+        <tr>
+          <td>How does the GitHub Action work?<span class="who">Arun answers</span></td>
+          <td>It clones our scanner repo, runs 4 scanners, prints score. Below 40 = CI fails. One YAML file, every commit protected.</td>
+        </tr>
+        <tr>
+          <td>What's the social impact?<span class="who">Dev answers</span></td>
+          <td>AI-generated code is everywhere — startups, students, enterprises. VibeCheck protects users from shipping code that leaks their data or has security holes.</td>
+        </tr>
+        <tr>
+          <td>Don't know the answer?<span class="who">Anyone</span></td>
+          <td>"That's a great question — we haven't explored that yet, but our hypothesis is..." Never bluff. Judges respect honesty.</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- ROLES TAB -->
+  <div id="roles" class="section">
+    <div class="card">
+      <h3>Team Positions During Judging</h3>
+      <div class="role-card">
+        <div class="role-avatar" style="background:#00F0FF">D</div>
+        <div class="role-info">
+          <div class="name">Dev — Presenter</div>
+          <div class="desc">Talks. Drives the demo. Answers non-technical questions. Stands front and center.</div>
+        </div>
+      </div>
+      <div class="role-card">
+        <div class="role-avatar" style="background:#FF4ECD">A</div>
+        <div class="role-info">
+          <div class="name">Arun — Technical Lead</div>
+          <div class="desc">Sits next to Dev. Handles technical deep-dives. Drives the laptop if needed.</div>
+        </div>
+      </div>
+      <div class="role-card">
+        <div class="role-avatar" style="background:#FFB84D">Y</div>
+        <div class="role-info">
+          <div class="name">Yash — Demo Support</div>
+          <div class="desc">Stands ready. Confirms demo repos are his. Can talk about the broken apps he built.</div>
+        </div>
+      </div>
+      <div class="role-card">
+        <div class="role-avatar" style="background:#7B61FF">Ab</div>
+        <div class="role-info">
+          <div class="name">Abhijay — Backup</div>
+          <div class="desc">Has backup video ready. Jumps in if live demo crashes.</div>
+        </div>
+      </div>
+      <div class="role-card">
+        <div class="role-avatar" style="background:#00E5C0">Ad</div>
+        <div class="role-info">
+          <div class="name">Adaa — Deck</div>
+          <div class="desc">Has pitch deck ready as backup. Can show slides if judges want high-level overview.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHECKLIST TAB -->
+  <div id="checklist" class="section">
+    <div class="card">
+      <h3>Pre-Demo Checklist</h3>
+      <div class="checklist">
+        <label><input type="checkbox"><span>Laptop plugged in and charged</span></label>
+        <label><input type="checkbox"><span>ANTHROPIC_API_KEY set in terminal</span></label>
+        <label><input type="checkbox"><span>npm run dev running (backend 3001 + frontend 5173)</span></label>
+        <label><input type="checkbox"><span>Browser open at localhost:5173 — zoom 150%</span></label>
+        <label><input type="checkbox"><span>Broken app URL ready to paste</span></label>
+        <label><input type="checkbox"><span>Clean app path ready: /tmp/clean-vibe-app</span></label>
+        <label><input type="checkbox"><span>Pre-scan both repos once (so results are cached)</span></label>
+        <label><input type="checkbox"><span>Abhijay's backup video ready on phone/laptop</span></label>
+        <label><input type="checkbox"><span>Adaa's deck on USB as backup</span></label>
+        <label><input type="checkbox"><span>Extension cord brought</span></label>
+        <label><input type="checkbox"><span>Dev has practiced 3+ times</span></label>
+        <label><input type="checkbox"><span>Team knows who answers what</span></label>
+      </div>
+    </div>
+  </div>
+
+  <!-- EMERGENCY TAB -->
+  <div id="emergency" class="section">
+    <div class="card">
+      <h3>If Things Go Wrong</h3>
+      <div class="emergency">
+        <div class="problem">Live demo crashes</div>
+        <div class="solution">Abhijay plays backup video. Dev says "Let me show you the recording." Never say "it was working 5 minutes ago."</div>
+      </div>
+      <div class="emergency">
+        <div class="problem">Scan takes too long</div>
+        <div class="solution">Talk about architecture while it loads. "Under the hood, 4 scanners run in parallel with Playwright MCP..."</div>
+      </div>
+      <div class="emergency">
+        <div class="problem">AI Simulation fails (rate limit)</div>
+        <div class="solution">Skip it. "The static analysis found 12 issues. Let me show you the code heatmap instead."</div>
+      </div>
+      <div class="emergency">
+        <div class="problem">WiFi dies</div>
+        <div class="solution">Scan local path /tmp/test-vibe-app instead — works completely offline.</div>
+      </div>
+      <div class="emergency">
+        <div class="problem">Judges ask to see code</div>
+        <div class="solution">Open GitHub: github.com/Arun07AK/vibecheck. Show commit history — built today.</div>
+      </div>
+      <div class="emergency">
+        <div class="problem">Don't know the answer</div>
+        <div class="solution">"Great question. We haven't explored that yet, but here's our hypothesis..." Judges respect honesty over bluffing.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function showTab(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  event.target.classList.add('active');
+}
+</script>
+</body>
+</html>
